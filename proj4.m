@@ -72,11 +72,9 @@ num_negative_examples = 10000; %Higher will work strictly better, but you should
 
 %YOU CODE classifier training. Make sure the outputs are 'w' and 'b'.
 lambda = 0.0001;
-features_pos = features_pos';
-features_neg = features_neg';
-X = [features_pos features_neg];
-Y = [ones(1, num_pos_img) -ones(1, num_neg_img)];
-[w, b] = vl_svmtrain(X, Y, lambda);
+X = [features_pos; features_neg]'; % D by N matrix
+Y = [ones(num_pos_img, 1); -1*ones(num_neg_img, 1)]'; % 1 by N vector
+[w, b] = vl_svmtrain(X, Y, lambda); % train w'*X(:, i) + b = Y(i)
 
 %% step 3. Examine learned classifier
 % You don't need to modify anything in this section. The section first
