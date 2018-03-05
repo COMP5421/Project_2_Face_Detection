@@ -44,7 +44,7 @@ run('vl_setup');
 data_path = '../data/'; %change if you want to work with a network copy
 train_path_pos = fullfile(data_path, 'caltech_faces/Caltech_CropFaces'); %Positive training examples. 36x36 head crops
 non_face_scn_path = fullfile(data_path, 'train_non_face_scenes'); %We can mine random or hard negatives from here
-test_scn_path = fullfile(data_path,'test_scenes/test_jpg'); %CMU+MIT test scenes
+test_scn_path = fullfile(data_path,'test_scenes/my_test'); %CMU+MIT test scenes
 % test_scn_path = fullfile(data_path,'extra_test_scenes'); %Bonus scenes
 label_path = fullfile(data_path,'test_scenes/ground_truth_bboxes.txt'); %the ground truth face locations in the test set
 
@@ -72,11 +72,9 @@ num_negative_examples = 10000; %Higher will work strictly better, but you should
 
 %YOU CODE classifier training. Make sure the outputs are 'w' and 'b'.
 lambda = 0.0001;
-features_pos = features_pos';
-features_neg = features_neg';
-X = [features_pos features_neg];
-Y = [ones(1, num_pos_img) -ones(1, num_neg_img)];
-[w, b] = vl_svmtrain(X, Y, lambda);
+X = [features_pos; features_neg]'; % D by N matrix
+Y = [ones(num_pos_img, 1); -1*ones(num_neg_img, 1)]'; % 1 by N vector
+[w, b] = vl_svmtrain(X, Y, lambda); % train w'*X(:, i) + b = Y(i)
 
 %% step 3. Examine learned classifier
 % You don't need to modify anything in this section. The section first
