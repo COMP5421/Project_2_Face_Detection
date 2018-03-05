@@ -32,25 +32,30 @@ function features_neg = get_random_negative_features(non_face_scn_path, feature_
 %  http://www.vlfeat.org/overview/hog.html   (Tutorial)
 % rgb2gray
 
-image_files = dir( fullfile( non_face_scn_path, '*.jpg' ));
+image_files = dir(fullfile( non_face_scn_path, '*.jpg' ));
 num_images = length(image_files);
 
-% D is the template dimensionality
-D = (feature_params.template_size / feature_params.hog_cell_size)^2 * 31;
+num_cells = feature_params.template_size / feature_params.hog_cell_size;
 
-features_neg = zeros(num_images, D);
+% D is the template dimensionality
+D = num_cells^2 * 31;
+
+features_neg = zeros(num_samples, D);
+
 samples_per_image = int32(num_samples/num_images);
 
 for i = 1 : num_images
     filename = [non_face_scn_path '/' image_files(i).name];
     img = imread(filename);
-    [X,Y,~] = size(img);
-    HOG = vl_hog(single(img),feature_params.hog_cell_size,'verbose');
-    for j=1 : samples_per_image
-        x = int32(rand*(X - feature_params.template_size));
-        y = int32(rand*(Y - feature_params.template_size));
-        hog = HOG((x/feature_params.hog_cell_size+1):(x/feature_params.hog_cell_size+num_cells),...
-            (y/feature_params.hog_cell_size+1):(y/feature_params.hog_cell_size+num_cells),:);
+    [img_width, img_length, img_dim] = size(img);
+    if img_dim == 3
+        img = rgb2gray(img);
+    end
+    HOG = vl_hog(single(img), feature_params.hog_cell_size, 'verbose');
+    for j = 1 : samples_per_image
+        x = int32(rand*(img_width - feature_params.template_size));
+        y = int32(rand*(img_length - feature_params.template_size));
+        hog = HOG((x/feature_params.hog_cell_size+1):(x/feature_params.hog_cell_size+num_cells),(y/feature_params.hog_cell_size+1):(y/feature_params.hog_cell_size+num_cells),:);
         hog = reshape(hog, [1, D]);
         features_neg((i-1)*samples_per_image+j,:) = hog;
     end
