@@ -38,7 +38,7 @@ num_images = length(image_files);
 % D is the template dimensionality
 D = (feature_params.template_size / feature_params.hog_cell_size)^2 * 31;
 
-features_pos = zeros(num_images, D);
+features_neg = zeros(num_images, D);
 samples_per_image = int32(num_samples/num_images);
 
 for i = 1 : num_images
