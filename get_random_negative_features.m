@@ -47,6 +47,9 @@ for i = 1 : num_images
     [X,Y,~]=size(img);
     HOG=vl_hog(single(Im),feature_params.hog_cell_size,'variant','dalaltriggs','numOrientations',num_orientations);
     for j=1:samples_per_image
+        x=int32(rand*(X-feature_params.template_size));
+        y=int32(rand*(Y-feature_params.template_size));
+        
         hog=HOG((x/feature_params.hog_cell_size+1):(x/feature_params.hog_cell_size+num_cells),...
             (y/feature_params.hog_cell_size+1):(y/feature_params.hog_cell_size+num_cells),:);
         temp1=reshape(hog,[num_cells^2,num_orientations*4]);
