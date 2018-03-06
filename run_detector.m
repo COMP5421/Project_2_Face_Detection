@@ -29,10 +29,10 @@ for i = 1:length(test_scenes)
         	for j = 1:floor((height-template_size)/step)+1
         		for k = 1:floor((width-template_size)/step)+1
         			window = img_scaled(1+(j-1)*step:1+(j-1)*step+template_size-1, 1+(k-1)*step:1+(k-1)*step+template_size-1);
-        			hog = vl_hog(single(window), cell_size, 'verbose');
+        			hog = vl_hog(single(window), cell_size);
         			hog = reshape(hog, [1, D]);
         			conf = hog*w+b;
-        			if conf>2
+        			if conf>1
                         temp_bboxes = [floor((1+(k-1)*step)/scal), floor((1+(j-1)*step)/scal), floor((1+(k-1)*step+template_size-1)/scal), floor((1+(j-1)*step+template_size-1)/scal)];
         				temp_confidences = conf;
         				temp_image_ids = test_scenes(i).name;
@@ -44,10 +44,10 @@ for i = 1:length(test_scenes)
             end
         end
     end
-    [is_maximum] = non_max_supr_bbox(cur_bboxes, cur_confidences, size(img));
-    cur_confidences = cur_confidences(is_maximum, :);
-    cur_bboxes = cur_bboxes(is_maximum, :);
-    cur_image_ids = cur_image_ids(is_maximum, :);
+    [is_valid] = non_max_supr_bbox(cur_bboxes, cur_confidences, size(img));
+    cur_confidences = cur_confidences(is_valid, :);
+    cur_bboxes = cur_bboxes(is_valid, :);
+    cur_image_ids = cur_image_ids(is_valid, :);
     bboxes = [bboxes; cur_bboxes];
     confidences = [confidences; cur_confidences];
     image_ids = [image_ids; cur_image_ids];
