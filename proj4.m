@@ -57,10 +57,10 @@ feature_params = struct('template_size', 36, 'hog_cell_size', 6);
 %% Step 1. Load positive training crops and random negative examples
 %YOU CODE 'get_positive_features' and 'get_random_negative_features'
 
-[features_pos, num_pos_img] = get_positive_features( train_path_pos, feature_params );
+features_pos = get_positive_features( train_path_pos, feature_params );
 
 num_negative_examples = 10000; %Higher will work strictly better, but you should start with 10000 for debugging
-[features_neg, num_neg_img] = get_random_negative_features( non_face_scn_path, feature_params, num_negative_examples);
+features_neg = get_random_negative_features( non_face_scn_path, feature_params, num_negative_examples);
 
 %% step 2. Train Classifier
 % Use vl_svmtrain on your training features to get a linear classifier
@@ -73,7 +73,7 @@ num_negative_examples = 10000; %Higher will work strictly better, but you should
 %YOU CODE classifier training. Make sure the outputs are 'w' and 'b'.
 lambda = 0.0001;
 X = [features_pos; features_neg]'; % D by N matrix
-Y = [ones(num_pos_img, 1); -1*ones(num_neg_img, 1)]'; % 1 by N vector
+Y = [ones(size(features_pos, 1), 1); -1*ones(size(features_neg, 1), 1)]'; % 1 by N vector
 [w, b] = vl_svmtrain(X, Y, lambda); % train w'*X(:, i) + b = Y(i)
 
 %% step 3. Examine learned classifier
