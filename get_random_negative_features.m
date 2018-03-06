@@ -51,7 +51,7 @@ for i = 1 : num_images
     if img_dim == 3
         img = rgb2gray(img);
     end
-    HOG = vl_hog(single(img), feature_params.hog_cell_size, 'verbose');
+    HOG = vl_hog(single(img), feature_params.hog_cell_size);
     for j = 1 : samples_per_image
         x = int32(rand*(img_width - feature_params.template_size));
         y = int32(rand*(img_length - feature_params.template_size));
