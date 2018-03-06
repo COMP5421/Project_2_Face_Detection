@@ -9,7 +9,7 @@ features_pos = zeros(num_images, D);
 for i = 1:num_images
     filename = [train_path_pos '/' image_files(i).name];
     img = imread(filename);
-    hog = vl_hog(single(img), feature_params.hog_cell_size, 'verbose');
+    hog = vl_hog(single(img), feature_params.hog_cell_size);
     hog = reshape(hog, [1, D]);
     features_pos(i, :) = hog;
 end
