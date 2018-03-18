@@ -43,6 +43,7 @@ run('vl_setup');
 
 data_path = '../data/'; %change if you want to work with a network copy
 train_path_pos = fullfile(data_path, 'caltech_faces/Caltech_CropFaces'); %Positive training examples. 36x36 head crops
+%train_path_pos = fullfile(data_path, 'NewFaceSet'); % New training examples. 36x36 head crops
 non_face_scn_path = fullfile(data_path, 'train_non_face_scenes'); %We can mine random or hard negatives from here
 test_scn_path = fullfile(data_path,'test_scenes/my_test'); %CMU+MIT test scenes
 % test_scn_path = fullfile(data_path,'extra_test_scenes'); %Bonus scenes
@@ -57,10 +58,12 @@ feature_params = struct('template_size', 36, 'hog_cell_size', 6);
 %% Step 1. Load positive training crops and random negative examples
 %YOU CODE 'get_positive_features' and 'get_random_negative_features'
 
+% Positive training examples
 features_pos = get_positive_features( train_path_pos, feature_params );
 
-num_negative_examples = 10000; %Higher will work strictly better, but you should start with 10000 for debugging
-features_neg = get_random_negative_features( non_face_scn_path, feature_params, num_negative_examples);
+% Random negative training examples
+num_negative_examples = 20000; %Higher will work strictly better, but you should start with 10000 for debugging
+features_neg = get_random_negative_features( non_face_scn_path, feature_params, num_negative_examples); 
 
 %% step 2. Train Classifier
 % Use vl_svmtrain on your training features to get a linear classifier
@@ -72,9 +75,9 @@ features_neg = get_random_negative_features( non_face_scn_path, feature_params, 
 
 %YOU CODE classifier training. Make sure the outputs are 'w' and 'b'.
 lambda = 0.0001;
-X = [features_pos; features_neg]'; % D by N matrix
-Y = [ones(size(features_pos, 1), 1); -1*ones(size(features_neg, 1), 1)]'; % 1 by N vector
-[w, b] = vl_svmtrain(X, Y, lambda); % train w'*X(:, i) + b = Y(i)
+X = [features_pos; features_neg]'; % D by Num_of_positive+Num_of_negative matrix
+Y = [ones(size(features_pos, 1), 1); -1*ones(size(features_neg, 1), 1)]'; % 1 by Num_of_positive+Num_of_negative vector
+[w, b] = vl_svmtrain(X, Y, lambda); % Train w'*X(:, i) + b = Y(i)
 
 %% step 3. Examine learned classifier
 % You don't need to modify anything in this section. The section first
@@ -119,6 +122,17 @@ imwrite(hog_template_image, 'visualizations/hog_template.png')
 % you probably want to modify 'run_detector', run the detector on the
 % images in 'non_face_scn_path', and keep all of the features above some
 % confidence level.
+
+
+% [new_negative_hog] = MineHardNegatives(non_face_scn_path, w, b, feature_params);
+% features_neg = [features_neg;new_negative_hog];
+% 
+% % Retrain the classifier
+% lambda = 0.0001;
+% X = [features_pos; features_neg]'; % D by Num_of_positive+Num_of_negative matrix
+% Y = [ones(size(features_pos, 1), 1); -1*ones(size(features_neg, 1), 1)]'; % 1 by Num_of_positive+Num_of_negative vector
+% [w, b] = vl_svmtrain(X, Y, lambda); % Train w'*X(:, i) + b = Y(i)
+
 
 %% Step 5. Run detector on test set.
 % YOU CODE 'run_detector'. Make sure the outputs are properly structured!
