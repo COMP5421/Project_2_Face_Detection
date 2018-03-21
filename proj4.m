@@ -46,14 +46,14 @@ train_path_pos = fullfile(data_path, 'caltech_faces/Caltech_CropFaces'); %Positi
 %train_path_pos = fullfile(data_path, 'NewFaceSet'); % New training examples. 36x36 head crops
 non_face_scn_path = fullfile(data_path, 'train_non_face_scenes'); %We can mine random or hard negatives from here
 test_scn_path = fullfile(data_path,'test_scenes/my_test'); %CMU+MIT test scenes
-% test_scn_path = fullfile(data_path,'extra_test_scenes'); %Bonus scenes
+%test_scn_path = fullfile(data_path,'extra_test_scenes'); %Bonus scenes
 label_path = fullfile(data_path,'test_scenes/ground_truth_bboxes.txt'); %the ground truth face locations in the test set
 
 %The faces are 36x36 pixels, which works fine as a template size. You could
 %add other fields to this struct if you want to modify HoG default
 %parameters such as the number of orientations, but that does not help
 %performance in our limited test.
-feature_params = struct('template_size', 36, 'hog_cell_size', 6);
+feature_params = struct('template_size', 36, 'hog_cell_size', 3);
 
 %% Step 1. Load positive training crops and random negative examples
 %YOU CODE 'get_positive_features' and 'get_random_negative_features'
@@ -62,7 +62,7 @@ feature_params = struct('template_size', 36, 'hog_cell_size', 6);
 features_pos = get_positive_features( train_path_pos, feature_params );
 
 % Random negative training examples
-num_negative_examples = 20000; %Higher will work strictly better, but you should start with 10000 for debugging
+num_negative_examples = 50000; %Higher will work strictly better, but you should start with 10000 for debugging
 features_neg = get_random_negative_features( non_face_scn_path, feature_params, num_negative_examples); 
 
 %% step 2. Train Classifier
@@ -124,14 +124,14 @@ imwrite(hog_template_image, 'visualizations/hog_template.png')
 % confidence level.
 
 
-% [new_negative_hog] = MineHardNegatives(non_face_scn_path, w, b, feature_params);
-% features_neg = [features_neg;new_negative_hog];
-% 
-% % Retrain the classifier
-% lambda = 0.0001;
-% X = [features_pos; features_neg]'; % D by Num_of_positive+Num_of_negative matrix
-% Y = [ones(size(features_pos, 1), 1); -1*ones(size(features_neg, 1), 1)]'; % 1 by Num_of_positive+Num_of_negative vector
-% [w, b] = vl_svmtrain(X, Y, lambda); % Train w'*X(:, i) + b = Y(i)
+[new_negative_hog] = MineHardNegatives(non_face_scn_path, w, b, feature_params);
+features_neg = [features_neg;new_negative_hog];
+
+% Retrain the classifier
+lambda = 0.0001;
+X = [features_pos; features_neg]'; % D by Num_of_positive+Num_of_negative matrix
+Y = [ones(size(features_pos, 1), 1); -1*ones(size(features_neg, 1), 1)]'; % 1 by Num_of_positive+Num_of_negative vector
+[w, b] = vl_svmtrain(X, Y, lambda); % Train w'*X(:, i) + b = Y(i)
 
 
 %% Step 5. Run detector on test set.

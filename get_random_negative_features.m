@@ -33,18 +33,20 @@ for i = 1 : num_images
     
     % Solution 1
     % First compute HOG of whole image, then extract region of interest
-    HOG = vl_hog(single(img), feature_params.hog_cell_size);
-    [HOG_width, HOG_length, ~] = size(HOG);
+    %HOG = vl_hog(single(img), feature_params.hog_cell_size);
+    %[HOG_width, HOG_length, ~] = size(HOG);
     for j = 1 : samples_per_image
-        %x = int32(randi([0 img_width-feature_params.template_size]));
-        %y = int32(randi([0 img_length-feature_params.template_size]));
+        x = int32(randi([1 img_width-feature_params.template_size+1]));
+        y = int32(randi([1 img_length-feature_params.template_size+1]));
+        window = img(x:x+feature_params.template_size-1, y:y+feature_params.template_size-1);
+        hog = vl_hog(single(window), feature_params.hog_cell_size);
         %x = int32(rand*(img_width - feature_params.template_size));
         %y = int32(rand*(img_length - feature_params.template_size));
-        x = int32(randi([1 HOG_width-num_cells+1]));
-        y = int32(randi([1 HOG_length-num_cells+1]));
+        %x = int32(randi([1 HOG_width-num_cells+1]));
+        %y = int32(randi([1 HOG_length-num_cells+1]));
         
         %hog = HOG((x/feature_params.hog_cell_size+1):(x/feature_params.hog_cell_size+num_cells),(y/feature_params.hog_cell_size+1):(y/feature_params.hog_cell_size+num_cells),:);
-        hog = HOG(x:x+num_cells-1,y:y+num_cells-1,:);
+        %hog = HOG(x:x+num_cells-1,y:y+num_cells-1,:);
         hog = reshape(hog,[1, D]);
         features_neg((i-1)*samples_per_image+j,:) = hog;
     end 

@@ -14,10 +14,14 @@ features_pos = zeros(num_images, D); % N by D matrix
 for i = 1:num_images
     filename = [train_path_pos '/' image_files(i).name];
     img = imread(filename);
-    %img = histeq(img);
+    %img_fliplr = fliplr(img);
+    img = histeq(img);
     hog = vl_hog(single(img), feature_params.hog_cell_size);
+    %hog_fliplr = vl_hog(single(img_fliplr), feature_params.hog_cell_size);
     hog = reshape(hog, [1, D]);
+    %hog_fliplr = reshape(hog_fliplr, [1, D]);
     features_pos(i, :) = hog;
+    %features_pos(i+num_images, :) = hog_fliplr;
 end
 
 end

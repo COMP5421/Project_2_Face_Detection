@@ -14,10 +14,11 @@ fprintf('~~~path: %s', test_scn_path);
 
 template_size = feature_params.template_size;
 cell_size = feature_params.hog_cell_size;
+num_cells = feature_params.template_size / feature_params.hog_cell_size; % Number of hog cells in one template
 D = (template_size / cell_size)^2 * 31; % Template dimensionality
-scales = [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1];
-%scales = [1.2, 1.15, 1.1, 1.05, 1, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25, 0.2, 0.15, 0.1];
-step = 6;
+%scales = [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1];
+scales = [1.2, 1.15, 1.1, 1.05, 1, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25, 0.2, 0.15, 0.1];
+step = 3;
 new_negative_hog = zeros(1, D);
 
 for i = 1:length(test_scenes)
@@ -31,18 +32,16 @@ for i = 1:length(test_scenes)
         img_scaled = imresize(img, scal);
         [height, width] = size(img_scaled);
         
-        %HOG = vl_hog(single(img_scaled), cell_size);       
-        if (height > template_size) && (width > template_size)
-            for j = 1:floor((height-template_size)/step)+1
-                for k = 1:floor((width-template_size)/step)+1
-        			window = img_scaled(1+(j-1)*step:(j-1)*step+template_size, 1+(k-1)*step:(k-1)*step+template_size);
-        			hog = vl_hog(single(window), cell_size);
-                    %hog = HOG(j,k);
-        			hog = reshape(hog, [1, D]);
-        			conf = hog*w + b;
-                    if conf > 0.95
-                        new_negative_hog = [new_negative_hog;hog];
-                    end
+        HOG = vl_hog(single(img_scaled), cell_size);       
+        for j = 1:floor((height-template_size)/step)
+            for k = 1:floor((width-template_size)/step)
+                %window = img_scaled(1+(j-1)*step:(j-1)*step+template_size, 1+(k-1)*step:(k-1)*step+template_size);
+                %hog = vl_hog(single(window), cell_size);
+                hog = HOG(j:j+num_cells-1,k:k+num_cells-1,:);
+                hog = reshape(hog, [1, D]);
+                conf = hog*w + b;
+                if conf > 1
+                    new_negative_hog = [new_negative_hog;hog];
                 end
             end
         end
