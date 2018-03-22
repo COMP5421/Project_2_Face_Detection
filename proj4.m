@@ -124,14 +124,14 @@ imwrite(hog_template_image, 'visualizations/hog_template.png')
 % confidence level.
 
 
-[new_negative_hog] = MineHardNegatives(non_face_scn_path, w, b, feature_params);
-features_neg = [features_neg;new_negative_hog];
-
-% Retrain the classifier
-lambda = 0.0001;
-X = [features_pos; features_neg]'; % D by Num_of_positive+Num_of_negative matrix
-Y = [ones(size(features_pos, 1), 1); -1*ones(size(features_neg, 1), 1)]'; % 1 by Num_of_positive+Num_of_negative vector
-[w, b] = vl_svmtrain(X, Y, lambda); % Train w'*X(:, i) + b = Y(i)
+% [new_negative_hog] = MineHardNegatives(non_face_scn_path, w, b, feature_params);
+% features_neg = [features_neg;new_negative_hog];
+% 
+% % Retrain the classifier
+% lambda = 0.0001;
+% X = [features_pos; features_neg]'; % D by Num_of_positive+Num_of_negative matrix
+% Y = [ones(size(features_pos, 1), 1); -1*ones(size(features_neg, 1), 1)]'; % 1 by Num_of_positive+Num_of_negative vector
+% [w, b] = vl_svmtrain(X, Y, lambda); % Train w'*X(:, i) + b = Y(i)
 
 
 %% Step 5. Run detector on test set.

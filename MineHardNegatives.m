@@ -40,7 +40,7 @@ for i = 1:length(test_scenes)
                 hog = HOG(j:j+num_cells-1,k:k+num_cells-1,:);
                 hog = reshape(hog, [1, D]);
                 conf = hog*w + b;
-                if conf > 1
+                if conf > 0.75
                     new_negative_hog = [new_negative_hog;hog];
                 end
             end
