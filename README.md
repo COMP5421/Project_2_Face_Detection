@@ -5,4 +5,4 @@ Multiscale sliding window is adopted to detect potential faces in the testing im
 Detailed project description:
 * [Face Detection](https://course.cse.ust.hk/comp5421/Password_Only/projects/faces/index.html) - HKUST ITSC required to log in. <br />
 
-Please download report.zip to see detailed project evaluation.
+Please refer to html/index.html for detailed project evaluation.
