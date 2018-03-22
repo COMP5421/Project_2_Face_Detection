@@ -1,0 +1,440 @@
+<html>
+<head>
+<title>COMP5421 Face Detection</title>
+<link href='http://fonts.googleapis.com/css?family=Nunito:300|Crimson+Text|Droid+Sans+Mono' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" title="Default" href="styles/github.css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>  
+
+<link rel="stylesheet" href="highlighting/styles/default.css">
+<script src="highlighting/highlight.pack.js"></script>
+
+<style type="text/css">
+body {
+	margin: 0px;
+	width: 100%;
+	font-family: 'Crimson Text', serif;
+	font-size: 20px;
+	background: #fcfcfc;
+}
+h1 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 28px;
+	margin: 25px 0px 0px 0px;
+	text-transform: lowercase;
+}
+h2 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 32px;
+	margin: 15px 0px 35px 0px;
+	color: #333;	
+	word-spacing: 3px;
+}
+h3 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 26px;
+	margin: 10px 0px 0px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+h4 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 22px;
+	margin: 10px 0px 10px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+h5 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 18px;
+	margin: 10px 0px 10px 0px;
+	color: #111;
+	word-spacing: 2px;
+}
+p, li {
+	color: #444;
+}
+a {
+	color: #C7EDCC;
+}
+.container {
+	margin: 0px auto 0px auto;
+	width: 1160px;
+}
+#header {
+	background: #333;
+	width: 100%;
+}
+#headersub {
+	color: #ccc;
+	width: 960px;
+	margin: 0px auto 0px auto;
+	padding: 20px 0px 20px 0px;
+}
+.chart {
+	width: 480px;
+}
+.lol {
+	font-size: 16px;
+	color: #888;
+	font-style: italic;
+}
+.sep {
+	height: 1px;
+	width: 100%;
+	background: #999;
+	margin: 20px 0px 20px 0px;
+}
+.footer{
+	font-size: 16px;
+}
+.latex {
+	width: 100%;
+}
+.latex img {
+	display: block;
+	margin: 0px auto 0px auto;
+}
+pre {
+	font-family: 'Droid Sans Mono';
+	font-size: 14px;
+}
+table td {
+  text-align: center;
+  vertical-align: middle;
+}
+table td img {
+  text-align: center;
+  vertical-align: middle;
+}
+#contents a {
+}
+</style>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+</script>
+</head>
+<body>
+<div id="header" >
+<div id="headersub">
+<h1>Xiyuan Liu, Shan Huang <span style="color: #DE3737; font-size: 20px"></span></h1>
+</div>
+</div>
+
+
+
+<div class="container">
+<h2 style="font-family:verdana">COMP5421 / Project 2 / Face Detection</h2>
+<div style="float: right; padding: 20px">
+<center>
+<img src="detections_cs143_2013_class_easy_01.jpg.png" width="100%"/>
+</center>
+</div>
+</div>
+
+
+
+<div class="container">
+<h2><b>Overview</b></h2> 
+<p>
+	In this project we implement a face detection program using SIFT-like Histogram of Gradients(HoG) based on Triggs's paper.<br>
+	We also test on some picture preprocessing techniques and extra positive training sets for better performance. Details are explained below.
+</p>
+
+<p>
+	The whole program mainly consists of the following steps.<br>
+<ol>
+	<li>Extract Histogram of Oriented Gradient(HOG) features from positive samples.</li>
+	<li>Extract Histogram of Oriented Gradient(HOG) features from random negative samples.</li>
+	<li>Train a Linear SVM classifer based on both positive and negative samples using vl_svmtrain.</li>
+	<li>(Extra credit) Hard negative mining, details are explained below.</li>
+	<li>Detect test dataset with multiple scale sliding windows, determing whether each window contains a face or not. </li>
+	<li>Generate a bounding box with confidence threshold.</li>
+	<li>Compute ROC, precision-recall curve and average precision.</li>
+</ol>
+</p>
+</div>
+
+
+
+
+<div class="container">
+<h3><b>Train Linear SVM</b></h3>
+<p>
+	We have extracted 6713 positive features (faces) from Caltech Web Faces dataset and extracted in total 50000 random negative features (non-faces) from SUN dataset.<br>
+	We use linear SVM (vl_svmtrain) with regularization parameter (lambda) as 0.0001 to obtain a linear classifier.
+</p>
+
+<h3><b>Multi-Scaling and Step Size</b></h3>
+<p>
+	We used multiple scale sliding windows (0.05:1.2:0.05) to detect images.<br> To evaluate the effects of different steps(HoG cell size) on test results, method of control variates are used.<br>
+	The following results are obtained with HoG_Template_Size=36, Confidence_Threshold=-0.5.
+</p>
+
+
+<div align="center">
+<table border=1>
+
+<tr>
+<td><b><font size="5">Hog Cell Size</font></b></td>
+<td><b><font size="5">Cell Size = 6</font></b></td>
+<td><b><font size="5">Cell Size = 4</font></b></td>
+<td><b><font size="5">Cell Size = 3</font></b></td>
+</tr>
+
+<tr>
+<td><b><font size="5">HoG</font></b></td>
+<td> <img src="hog_template6.png" width="100%"/> </td>
+<td> <img src="hog_template4.png" width="100%"/> </td>
+<td> <img src="hog_template3.png" width="100%"/> </td>
+</tr>
+
+<tr>
+<td><b><font size="5">Average Precision</font></b></td>
+<td> <img src="average_precision6.png" width="100%"/> </td>
+<td> <img src="average_precision4.png" width="100%"/> </td>
+<td> <img src="average_precision3.png" width="100%"/> </td> 
+</tr>
+
+<tr>
+<td><b><font size="5">Recall(Viola Jones)</font></b></td>
+<td> <img src="Detection rate6.jpg" width="100%"/> </td>
+<td> <img src="Detection rate4.jpg" width="100%"/> </td>
+<td> <img src="Detection rate3.jpg" width="100%"/> </td>
+</tr>
+
+<tr>
+<td><b><font size="5">Sample Result</font></b></td>
+<td> <img src="detections_henry6.png" width="100%"/> </td>
+<td> <img src="detections_henry4.png" width="100%"/> </td>
+<td> <img src="detections_henry3.png" width="100%"/> </td>
+</tr>
+
+</table>
+</div>
+<p>
+	It turns out that the detection results become better as HoG cell size gets smaller. However, the total running time also increases dramatically. It is safe to conclude that there exists a tradeoff between average precision and running time.
+</p>
+</div>
+
+
+
+<div class="container">
+<h3><b>Extra Credit: Hard Negative Mining</b></h3>
+<p>
+	To refine our classifier, we implement the method of hard negative mining, which includes the following steps:<br>
+<ol>
+	<li>......previous steps to obtain the initial SVM.</li>
+	<li>Test the SVM on negative samples dataset we used in the previous step.</li>
+	<li>Since there should be no faces in the negative dataset, any detection of faces (confidence above certain threshold) should be false positive and will be recorded.</li>
+	<li>Add the recorded new negative features to the old negative feature set.</li>
+	<li>Retrain the SVM using old positive feature set and new nageative feature set. </li>
+	<li>The enhanced SVM is obtained. </li>
+</ol>
+<p>The following results show the improvements hard negative mining has on the SVM.<br>(HoG_Template_Size=36, HoG_Cell_Size=3, Confidence_Threshold=-0.5)</p>
+</p>
+
+
+
+
+<div align="center">
+<table border=1 width="1000">
+
+<tr>
+<td></td>
+<td><b><font size="5">Hard Negative Mining=OFF</font></b></td>
+<td><b><font size="5">Hard Negative Mining=ON</font></b></td>
+</tr>
+
+<tr>
+<td><b><font size="5">Average Precision</font></b></td>
+<td> <img src="average_precision3.png" width="100%"/> </td>
+<td> <img src="average_precision3_hnm.png" width="100%"/> </td>
+</tr>
+
+<tr>
+<td><b><font size="5">Recall(Viola Jones)</font></b></td>
+<td> <img src="Detection rate3.jpg" width="100%"/> </td>
+<td> <img src="Detection rate3_hnm.jpg" width="100%"/> </td>
+</tr>
+
+<tr>
+<td><b><font size="5">Sample Result</font></b></td>
+<td> <img src="detections_Arsenal3.jpg.png" width="100%"/> </td>
+<td> <img src="detections_Arsenal3_hnm.jpg.png" width="100%"/> </td>
+</tr>
+
+</table>
+</div>
+<p>
+	Hard negative mining does improve the performance a little bit. However, it also increase the training time.
+</p>
+</div>
+
+
+
+
+
+<div class="container">
+<h3><b>Extra Credit: Alternative Positive Training Data</b></h3>
+
+<p>
+	We search for extra face dataset and find Labeled Faces in the Wild(LFW) dataset from UMASS. We select around 8000 extra face images and resize them to 36*36, then mix up with the caltech faces dataset. Finally, we divided the dataset into two new datasets with each contains around 10000 faces images. The results below illustrates performance of each datasets.<br>
+	(HoG_Template_Size=36, HoG_Cell_Size=3, Confidence_Threshold=-0.5, HNM=OFF)
+</p>
+
+
+
+<div align="center">
+<table border=1 width="1000">
+
+<tr>
+<td></td>
+<td><b><font size="5">NewFaceSet</font></b></td>
+<td><b><font size="5">NewFaceSet2</font></b></td>
+</tr>
+
+<tr>
+<td><b><font size="5">HoG</font></b></td>
+<td> <img src="hog_template_NFS.png" width="100%"/> </td>
+<td> <img src="hog_template_NFS2.png" width="100%"/> </td>
+</tr>
+
+<tr>
+<td><b><font size="5">Average Precision</font></b></td>
+<td> <img src="average_precision_NFS.png" width="100%"/> </td>
+<td> <img src="average_precision_NFS2.png" width="100%"/> </td>
+</tr>
+
+<tr>
+<td><b><font size="5">Recall(Viola Jones)</font></b></td>
+<td> <img src="Detection rate_NFS.jpg" width="100%"/> </td>
+<td> <img src="Detection rate_NFS2.jpg" width="100%"/> </td>
+</tr>
+
+<tr>
+<td><b><font size="5">Sample Result</font></b></td>
+<td> <img src="detections_Brazil_NFS.png" width="100%"/> </td>
+<td> <img src="detections_Brazil_NFS2.png" width="100%"/> </td>
+</tr>
+
+</table>
+</div>
+
+<p>
+	In general, our NewFaceSet2 performes better than NewFaceSet. After rough inspection of these two dataset, we find that NewFaceSet contains many pictures that are the same face but from different directions, that is probably why the HoG image of NewFaceSet is not so face-like.
+</p>
+</div>
+
+
+<div class="container">
+<h3><b>Extra Credit: Interesting Features</b></h3>
+	
+<p>
+	In search for better recognition, we look into faces that can not be detected and apply different image augmentaion skills including:<br>
+<ul>
+	<li>When doing multiple scale window detection, apply contrast stretching to each extracted windows before computing HoG.<br>
+	Reason: We find that many undetected faces are not equally illuminated, may result in false negative.</li>
+	<li>When extracting positive samples, flip each image to get a new positive sample and add it to the positive features.<br>
+	Reason: Some false negative are due to different directions of faces, some face even turn up side down.</li>
+	<li>When extracting negative samples, downsize image with multiple scales before extracting.<br>
+	Reason: This is suggested in the comment, however, we believe random negatives should be good enough.</li>
+</ul> 
+<p>Unfortunately, none of the techniques mentioned above have noticeable improvement on the recognition result.<br>
+(HoG_Template_Size=36, HoG_Cell_Size=3, Confidence_Threshold=-0.5, HNM=OFF)
+</p>
+</p>
+
+<div align="center">
+<table border=1>
+
+<tr>
+<td></td>
+<td><b><font size="5">Contrast Stretching</font></b></td>
+<td><b><font size="5">Flipped Face</font></b></td>
+<td><b><font size="5">Downsize Negative Samples</font></b></td>
+</tr>
+
+<tr>
+<td><b><font size="5">Average Precision</font></b></td>
+<td> <img src="average_precision_histeql.png" width="100%"/> </td>
+<td> <img src="average_precision_flipface.png" width="100%"/> </td>
+<td> <img src="average_precision_downsize.png" width="100%"/> </td>
+</tr>
+
+</table>
+</div>
+</div>
+</div>
+
+
+<div class="container">
+<h3><b>Best Performance</b></h3>
+<p>The best average precision we obtain is 0.937, under the following conditions:<br>
+	HoG_Template_Size=36, HoG_Cell_Size=3, Confidence_Threshold=-1.1, HNM=ON
+</p>
+<div align="center">
+<table border=1>
+
+<tr>
+<td></td>
+<td><b><font size="5">HoG</font></b></td>
+<td><b><font size="5">Average Precision</font></b></td>
+<td><b><font size="5">Recall(Viola Jones)</font></b></td>
+<td><b><font size="5">Sample Results</font></b></td>
+</tr>
+
+<tr>
+<td><b><font size="5">Best Performance</font></b></td>
+<td> <img src="hog_template_best.png" width="100%"/> </td>
+<td> <img src="average_precision_best.png" width="100%"/> </td>
+<td> <img src="detection rate_best.jpg" width="100%"/> </td>
+<td> <img src="detections_trekcolr_best.png" width="100%"/> </td>
+</tr>
+
+</table>
+</div>
+<p>However, due to the relativly low confidence threshold, there are many false positives. 
+</p>
+</div>
+
+
+
+<div class="container">
+<h3><b>Test Result on Extra Test Scenes</b></h3>
+<p>
+	HoG_Template_Size=36, HoG_Cell_Size=3, Confidence_Threshold=0.95, HNM=ON
+</p>
+<center>
+<p>
+<img src="detections_cs143_2011_class_easy.jpg.png" width="45%"/>
+<img src="detections_cs143_2011_class_hard.jpg.png" width="48%"/>
+</p>
+</center>
+<center>
+<p>
+<img src="detections_cs143_2013_class_easy_01.jpg.png" width="45%"/>
+<img src="detections_cs143_2013_class_easy_02.jpg.png" width="49%"/>
+</p>
+</center>
+<center>
+<p>
+<img src="detections_cs143_2013_class_hard_01.jpg.png" width="60%"/>
+<img src="detections_cs143_2013_class_hard_02.jpg.png" width="60%"/>
+<img src="detections_cs143_2013_class_hard_03.jpg.png" width="60%"/>
+</p>
+</center>
+
+</div>
+
+
+<center><p>
+	The END
+<p></center>
+
+</body>
+</html>
