@@ -4,12 +4,12 @@
 % Database, and SUN scene database.
 
 % Code structure:
-% proj4.m <--- You code parts of this
-%  + get_positive_features.m  <--- You code this
-%  + get_random_negative_features.m  <--- You code this
-%   [classifier training]   <--- You code this
+% proj4.m 
+%  + get_positive_features.m  
+%  + get_random_negative_features.m 
+%   [classifier training]  
 %  + report_accuracy.m
-%  + run_detector.m  <--- You code this
+%  + run_detector.m  
 %    + non_max_supr_bbox.m
 %  + evaluate_all_detections.m
 %    + VOCap.m
@@ -44,10 +44,14 @@ run('vl_setup');
 data_path = '../data/'; %change if you want to work with a network copy
 train_path_pos = fullfile(data_path, 'caltech_faces/Caltech_CropFaces'); %Positive training examples. 36x36 head crops
 %train_path_pos = fullfile(data_path, 'NewFaceSet'); % New training examples. 36x36 head crops
+%train_path_pos = fullfile(data_path, 'NewFaceSet2'); % New training examples. 36x36 head crops
 non_face_scn_path = fullfile(data_path, 'train_non_face_scenes'); %We can mine random or hard negatives from here
 test_scn_path = fullfile(data_path,'test_scenes/my_test'); %CMU+MIT test scenes
 %test_scn_path = fullfile(data_path,'extra_test_scenes'); %Bonus scenes
+%test_scn_path = fullfile(data_path,'bonus_competition/test_jpg/test_jpg'); %Bonus Competition 
 label_path = fullfile(data_path,'test_scenes/ground_truth_bboxes.txt'); %the ground truth face locations in the test set
+%label_path = fullfile(data_path,'bonus_competition/ground_truth_bboxes.txt');
+
 
 %The faces are 36x36 pixels, which works fine as a template size. You could
 %add other fields to this struct if you want to modify HoG default
@@ -124,6 +128,9 @@ imwrite(hog_template_image, 'visualizations/hog_template.png')
 % confidence level.
 
 
+% Uncomment the following code to turn on hard negative mining
+% Warning: it may be very slow.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % [new_negative_hog] = MineHardNegatives(non_face_scn_path, w, b, feature_params);
 % features_neg = [features_neg;new_negative_hog];
 % 
@@ -132,7 +139,7 @@ imwrite(hog_template_image, 'visualizations/hog_template.png')
 % X = [features_pos; features_neg]'; % D by Num_of_positive+Num_of_negative matrix
 % Y = [ones(size(features_pos, 1), 1); -1*ones(size(features_neg, 1), 1)]'; % 1 by Num_of_positive+Num_of_negative vector
 % [w, b] = vl_svmtrain(X, Y, lambda); % Train w'*X(:, i) + b = Y(i)
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Step 5. Run detector on test set.
 % YOU CODE 'run_detector'. Make sure the outputs are properly structured!
@@ -156,6 +163,10 @@ imwrite(hog_template_image, 'visualizations/hog_template.png')
 % Don't modify anything in 'evaluate_detections'!
 [gt_ids, gt_bboxes, gt_isclaimed, tp, fp, duplicate_detections] = ...
     evaluate_detections(bboxes, confidences, image_ids, label_path);
+
+%[gt_ids, gt_bboxes, gt_isclaimed, tp, fp, duplicate_detections] = ...
+ %   evaluate_detections_com(bboxes, confidences, image_ids, label_path);
+
 
 visualize_detections_by_image(bboxes, confidences, image_ids, tp, fp, test_scn_path, label_path)
 % visualize_detections_by_image_no_gt(bboxes, confidences, image_ids, test_scn_path)

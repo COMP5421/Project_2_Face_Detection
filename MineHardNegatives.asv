@@ -10,6 +10,7 @@ function [new_negative_hog] = MineHardNegatives(test_scn_path, w, b, feature_par
 test_scenes = dir( fullfile( test_scn_path, '*.jpg' ));
 fprintf('~~~path: %s', test_scn_path);
 
+
 template_size = feature_params.template_size;
 cell_size = feature_params.hog_cell_size;
 num_cells = feature_params.template_size / feature_params.hog_cell_size; % Number of hog cells in one template
@@ -38,7 +39,7 @@ for i = 1:length(test_scenes)
                 hog = HOG(j:j+num_cells-1,k:k+num_cells-1,:);
                 hog = reshape(hog, [1, D]);
                 conf = hog*w + b;
-                if conf > 0.75 % False positive detected
+                if conf > 0.75
                     new_negative_hog = [new_negative_hog;hog];
                 end
             end

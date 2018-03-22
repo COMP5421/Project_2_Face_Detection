@@ -6,15 +6,9 @@ function features_neg = get_random_negative_features(non_face_scn_path, feature_
 
 image_files = dir(fullfile( non_face_scn_path, '*.jpg' ));
 num_images = length(image_files);
-
 num_cells = feature_params.template_size / feature_params.hog_cell_size; % Number of hog cells in one template
-
 D = num_cells^2 * 31; % Template dimensionality
-
-%features_neg = zeros(num_samples, D); % N by D matrix
-
 samples_per_image = int32(num_samples / num_images); % Extract the same amount of negative samples from each image
-
 features_neg = zeros(samples_per_image*num_images, D); % N by D matrix,avoid useless 0
 
 % scales = [1, 0.9, 0.8, 0.7, 0.6];
@@ -32,21 +26,12 @@ for i = 1 : num_images
     %img = histeq(img);
     
     % Solution 1
-    % First compute HOG of whole image, then extract region of interest
-    %HOG = vl_hog(single(img), feature_params.hog_cell_size);
-    %[HOG_width, HOG_length, ~] = size(HOG);
+    % First extract region of interest,then compute HOG of the extracted region
     for j = 1 : samples_per_image
         x = int32(randi([1 img_width-feature_params.template_size+1]));
         y = int32(randi([1 img_length-feature_params.template_size+1]));
         window = img(x:x+feature_params.template_size-1, y:y+feature_params.template_size-1);
         hog = vl_hog(single(window), feature_params.hog_cell_size);
-        %x = int32(rand*(img_width - feature_params.template_size));
-        %y = int32(rand*(img_length - feature_params.template_size));
-        %x = int32(randi([1 HOG_width-num_cells+1]));
-        %y = int32(randi([1 HOG_length-num_cells+1]));
-        
-        %hog = HOG((x/feature_params.hog_cell_size+1):(x/feature_params.hog_cell_size+num_cells),(y/feature_params.hog_cell_size+1):(y/feature_params.hog_cell_size+num_cells),:);
-        %hog = HOG(x:x+num_cells-1,y:y+num_cells-1,:);
         hog = reshape(hog,[1, D]);
         features_neg((i-1)*samples_per_image+j,:) = hog;
     end 

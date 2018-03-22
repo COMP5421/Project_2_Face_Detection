@@ -5,10 +5,8 @@ function features_pos = get_positive_features(train_path_pos, feature_params)
 % if you're using the default vl_hog parameters
 
 image_files = dir(fullfile( train_path_pos, '*.jpg') ); % Caltech Faces stored as .jpg
-
 num_images = length(image_files); % Number of faces/pictures -- N
 D = (feature_params.template_size / feature_params.hog_cell_size)^2 * 31; % Template dimensionality -- D
-
 features_pos = zeros(num_images, D); % N by D matrix
 
 for i = 1:num_images
